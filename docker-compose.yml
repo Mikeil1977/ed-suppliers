@@ -33,7 +33,7 @@ services:
     environment:
       DATABASE_URL: postgres://ed:ed@postgres:5432/ed_data
     labels:
-      - "traefik.http.routers.backend.rule=Host(`backend.localhost`)"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/backend`)"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
     networks:
       - backend
@@ -42,7 +42,7 @@ services:
   frontend:
     build: ./frontend
     labels:
-      - "traefik.http.routers.frontend.rule=Host(`localhost`)"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
     networks:
       - web
