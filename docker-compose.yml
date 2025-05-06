@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: traefik:latest
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - web
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ed
+      POSTGRES_PASSWORD: ed
+      POSTGRES_DB: ed_data
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  backend:
+    build: ./backend
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://ed:ed@postgres:5432/ed_data
+    labels:
+      - "traefik.http.routers.backend.rule=Host(`backend.localhost`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+    networks:
+      - backend
+      - web
+
+  frontend:
+    build: ./frontend
+    labels:
+      - "traefik.http.routers.frontend.rule=Host(`localhost`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+    networks:
+      - web
+
+  worker:
+    build: ./worker
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://ed:ed@postgres:5432/ed_data
+    networks:
+      - backend
+
+volumes:
+  pg_data:
+
+networks:
+  backend:
+  web:
