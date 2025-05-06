@@ -37,6 +37,8 @@ services:
     labels:
       - "traefik.http.routers.backend.rule=PathPrefix(`/backend`)"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.http.middlewares.backend-strip.stripprefix.prefixes=/backend"
+      - "traefik.http.routers.backend.middlewares=backend-strip"
     networks:
       - backend
       - web
