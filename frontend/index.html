@@ -1,8 +1,35 @@
 <!DOCTYPE html>
 <html>
-  <head><title>ED Suppliers</title></head>
+  <head>
+    <title>ED Suppliers</title>
+    <script>
+      async function fetchStationTypes() {
+        const res = await fetch('/backend/station-types');
+        const types = await res.json();
+        const select = document.getElementById('stationSelect');
+        types.forEach(type => {
+          const option = document.createElement('option');
+          option.value = type;
+          option.text = type;
+          select.appendChild(option);
+        });
+      }
+
+      async function showRequirements() {
+        const selected = document.getElementById('stationSelect').value;
+        const res = await fetch('/backend/requirements?type=' + encodeURIComponent(selected));
+        const data = await res.json();
+        const display = document.getElementById('requirements');
+        display.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+      }
+
+      window.onload = fetchStationTypes;
+    </script>
+  </head>
   <body>
-    <h1>ED Supplier Stack Online</h1>
-    <p>This is a static frontend placeholder.</p>
+    <h1>ED Supplier Stack</h1>
+    <label for="stationSelect">Select a station type:</label>
+    <select id="stationSelect" onchange="showRequirements()"></select>
+    <div id="requirements"></div>
   </body>
 </html>
